@@ -5,24 +5,31 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MineSweeperWPF"              
         mc:Ignorable="d"        
-        Title="MainWindow" Height="450" Width="800" ResizeMode="CanMinimize">
-    <DockPanel LastChildFill="True">
-        <Menu Height="25" VerticalAlignment="Center" DockPanel.Dock="Top">
+        Title="MainWindow" Height="450" Width="800" ResizeMode="NoResize"
+        x:Name="window">
+    <DockPanel>
+        <Menu x:Name="menu" Height="25" VerticalAlignment="Center" DockPanel.Dock="Top">
             <MenuItem Header="Game">
                 <MenuItem Header="New game" ></MenuItem>
                 <Separator />
-                <MenuItem Header="Easy" IsCheckable="True" ></MenuItem>
-                <MenuItem Header="Medium" IsCheckable="True"></MenuItem>
-                <MenuItem Header="Hard" IsCheckable="True"></MenuItem>
-                <MenuItem Header="Custom..." IsCheckable="True"></MenuItem>
+                <MenuItem Header="Easy"></MenuItem>
+                <MenuItem Header="Medium" ></MenuItem>
+                <MenuItem Header="Hard"></MenuItem>
+                <MenuItem Header="Custom..."></MenuItem>
                 <Separator />
                 <MenuItem Header="Exit" ></MenuItem>
             </MenuItem>
         </Menu>
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Background="Bisque" >
-            <Button x:Name="restartBtn" Width="50" Height="30" Margin="10 5" Content="Restart" Click="Button_Click"/>
-            <Label x:Name="minesCountLabel" Content="000" FontSize="22"/>
-        </StackPanel>
-        <UniformGrid x:Name="field" Rows="8" Columns="8" Background="DarkSlateBlue" />
+        <Grid x:Name="gamePanel" DockPanel.Dock="Top" Background="Bisque" Height="40">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Label x:Name="minesCountLabel" Content="000" FontSize="22" Grid.Column="0"/>
+            <Button x:Name="restartBtn" Width="50" Height="30" Margin="10 5" Content="Restart" Click="Button_Click" Grid.Column="1"/>
+        </Grid>
+        <UniformGrid x:Name="field" Background="RoyalBlue">
+        </UniformGrid>
     </DockPanel>
 </Window>

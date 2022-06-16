@@ -23,7 +23,7 @@ namespace MineSweeperWPF
         public Tile()
         {
             PreviewMouseDown += Tile_MouseUp;
-            Background = Brushes.White;
+            Background = Brushes.WhiteSmoke;
             
 
         }

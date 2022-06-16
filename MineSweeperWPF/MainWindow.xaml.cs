@@ -21,6 +21,7 @@ namespace MineSweeperWPF
     public partial class MainWindow : Window
     {
         private int rows, columns, mines;
+        private double tileSize = 40;
         //public GameObject tilePrefab;
         //public Text minesCountLabel;
 
@@ -47,7 +48,7 @@ namespace MineSweeperWPF
             field.Columns = columns;
             field.Children.Clear();
 
-            ScaleGrid();
+            ResizeWindow();
             minesCountLabel.Content = mines.ToString();
             gameView = new GameView();
 
@@ -70,7 +71,7 @@ namespace MineSweeperWPF
                     //tiles[i, j].RightClick += (pos) => FlagClick?.Invoke(pos);
                     var tile = new Tile();
                     //tile.Content = $"{i} {j}";
-                    tile.Margin = new Thickness(3, 3, 3, 3);
+                    //tile.Margin = new Thickness(3, 3, 3, 3);
                     
                     tile.Position = new Position(i, j);
                     tile.LeftClick += (pos) => OpenClick?.Invoke(pos);
@@ -109,8 +110,16 @@ namespace MineSweeperWPF
         }
 
 
-        public void ScaleGrid()
+        public void ResizeWindow()
         {
+            window.Height = (field.Rows * tileSize) + menu.Height + gamePanel.Height;
+            window.Width = field.Columns * tileSize;
+
+            //field.Height = field.Rows * tileSize;
+            //field.Width = field.Columns * tileSize;
+            //window.Width = field.Width;
+            //window.Height = field.Height + menu.Height + gamePanel.Height;
+
 
             //var rect = GetComponent<RectTransform>();
             //var grid = GetComponent<GridLayoutGroup>();
