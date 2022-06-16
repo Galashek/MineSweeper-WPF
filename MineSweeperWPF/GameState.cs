@@ -24,24 +24,24 @@ namespace MineSweeperWPF
         public event Action<Position[]> MineOpen;
         public event Action Failed;
 
-        public GameState(int rows, int columns, int mines, MainWindow game)
+        public GameState(Settings settings, MainWindow game)
         {
-            this.rows = rows;
-            this.columns = columns;
-            this.mines = mines;
+            (rows, columns, mines) = settings;
             grid = new Field(rows, columns, mines);
             tileOpened = new bool[rows, columns];
             tileFlagged = new bool[rows, columns];
             MinesLeft = mines;
             openedCounter = 0;
             first = true;
+        }        
 
-            game.OpenClick += Handle;
-            game.FlagClick += SetFlag;
-        }
-
-        private void Handle(Position pos)
+        public void HandleClick(Position pos, bool flagging)
         {
+            if (flagging)
+            {
+                SetFlag(pos);
+                return;
+            }
             if (tileFlagged[pos.Row, pos.Column]) return;
             if (tileOpened[pos.Row, pos.Column]) SetNearOpened(pos);
             else
@@ -70,7 +70,6 @@ namespace MineSweeperWPF
             }
             else
             {
-
                 TileOpen?.Invoke(pos, grid[pos]);
 
                 if (grid[pos] == 0)

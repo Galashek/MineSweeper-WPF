@@ -4,133 +4,140 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace MineSweeperWPF
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
-        private int rows, columns, mines;
-        private double tileSize = 40;
-        //public GameObject tilePrefab;
-        //public Text minesCountLabel;
-
         private GameState gameState;
-        private GameView gameView;
+        private Settings currentSettings;
 
-        public event Action<Position> OpenClick;
-        public event Action<Position> FlagClick;
+        private Tile[,] tiles;
+        public Brush
+            empty = Brushes.White,
+            opened = Brushes.SlateGray,
+            flagged = Brushes.DarkBlue,
+            failed = Brushes.Red;
 
         //public Timer timer;
 
         public MainWindow()
         {
             InitializeComponent();
+            CreateGame(Settings.Easy);
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void CreateGame(Settings settings)
         {
-            rows = Settings.Rows;
-            columns = Settings.Columns;
-            mines = Settings.Mines;
+            currentSettings = settings;
+            (var rows, var columns, var mines) = currentSettings;
+            ResizeWindow(rows, columns);
 
-            field.Rows = rows;
-            field.Columns = columns;
-            field.Children.Clear();
-
-            ResizeWindow();
             minesCountLabel.Content = mines.ToString();
-            gameView = new GameView();
-
-            gameState = new GameState(rows, columns, mines, this);
-            gameState.FirstTileOpen += StartGame;
-            gameState.AllTilesOpened += Win;
-            gameState.Failed += Lose;
-            gameState.FlagSet += (x, y) => minesCountLabel.Content = gameState.MinesLeft.ToString();
-
-            var tiles = new Tile[rows, columns];
+            gameState = new GameState(currentSettings, this);
+            
+            tiles = new Tile[rows, columns];
             for (int i = 0; i < rows; i++)
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    //var tile = Instantiate(tilePrefab, transform);
-                    //tile.name = $"{i} {j}";
-                    //tiles[i, j] = tile.GetComponent<Tile>();
-                    //tiles[i, j].Position = new Position(i, j);
-                    //tiles[i, j].LeftClick += (pos) => OpenClick?.Invoke(pos);
-                    //tiles[i, j].RightClick += (pos) => FlagClick?.Invoke(pos);
-                    var tile = new Tile();
-                    //tile.Content = $"{i} {j}";
-                    //tile.Margin = new Thickness(3, 3, 3, 3);
-                    
-                    tile.Position = new Position(i, j);
-                    tile.LeftClick += (pos) => OpenClick?.Invoke(pos);
-                    tile.RightClick += (pos) => FlagClick?.Invoke(pos);
-
+                    var tile = new Tile
+                    {
+                        Position = new Position(i, j)
+                    };
+                    tile.LeftClick += (pos) => gameState.HandleClick(pos, false);
+                    tile.RightClick += (pos) => gameState.HandleClick(pos, true);
                     tiles[i, j] = tile;
-                    
                     field.Children.Add(tile);
                 }
             }
-            //GetComponent<GameView>().Initialize(tiles, gameState);            
-            gameView.Initialize(tiles, gameState);
+            gameState.FirstTileOpen += StartGame;
+            gameState.AllTilesOpened += Win;
+            gameState.Failed += Lose;
+            gameState.FlagSet += (x, y) => minesCountLabel.Content = gameState.MinesLeft.ToString();
+            gameState.TileOpen += OpenTile;
+            gameState.FlagSet += FlagTile;
+            gameState.MineOpen += Explode;
+            gameState.AllTilesOpened += DisableAllTiles;
         }
 
         private void StartGame()
         {
             //timer.StartTimer();
-            //Debug.Log("Game started!");
+            
         }
 
         private void Win()
         {
             //timer.StopTimer();
-            //Debug.Log("You won!");
+            MessageBox.Show("You win");
         }
 
         private void Lose()
         {
             //timer.StopTimer();
-            //Debug.Log("You lose!");
+            //MessageBox.Show("You lose");
         }
 
-        public void LoadScene(int id)
+        private void Restart(object s, RoutedEventArgs e)
+            => CreateGame(currentSettings);
+        
+        private void StartEasyGame(object s, RoutedEventArgs e)
+            => CreateGame(Settings.Easy);
+
+        private void StartMediumGame(object s, RoutedEventArgs e)
+            => CreateGame(Settings.Medium);
+
+        private void StartHardGame(object s, RoutedEventArgs e)
+            => CreateGame(Settings.Hard);
+
+        private void StartCustomGame(object s, RoutedEventArgs e)
         {
-            //UnityEngine.SceneManagement.SceneManager.LoadScene(id);
+            var window = new CustomSettingsWindow();
+            if (window.ShowDialog() == true)
+                CreateGame(window.Settings);
         }
 
-
-        public void ResizeWindow()
+        public void ResizeWindow(int rows, int columns)
         {
+            field.Children.Clear();
+            field.Rows = rows;
+            field.Columns = columns;
+            var tileSize = 40d;
             window.Height = (field.Rows * tileSize) + menu.Height + gamePanel.Height;
             window.Width = field.Columns * tileSize;
-
-            //field.Height = field.Rows * tileSize;
-            //field.Width = field.Columns * tileSize;
-            //window.Width = field.Width;
-            //window.Height = field.Height + menu.Height + gamePanel.Height;
-
-
-            //var rect = GetComponent<RectTransform>();
-            //var grid = GetComponent<GridLayoutGroup>();
-
-            //grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            //grid.constraintCount = columns;
-
-            //var width = columns * grid.cellSize.x + (columns - 1) * grid.spacing.x + 10 * grid.padding.left;
-            //var height = rows * grid.cellSize.y + (rows - 1) * grid.spacing.y + 10 * grid.padding.top;
-
-            //rect.sizeDelta = new Vector2(width, height);
         }
+
+        private void OpenTile(Position pos, int mineCount)
+        {
+            tiles[pos.Row, pos.Column].Background = opened;
+            if (mineCount > 0)
+                tiles[pos.Row, pos.Column].Content = mineCount.ToString();
+            else
+                tiles[pos.Row, pos.Column].Disable();
+        }
+
+        private void FlagTile(Position pos, bool state)
+        {
+            tiles[pos.Row, pos.Column].Background = state ? flagged : empty;
+        }
+
+        private void Explode(Position[] mines)
+        {
+            DisableAllTiles();
+            foreach (var pos in mines)
+                tiles[pos.Row, pos.Column].Background = failed;
+        }
+
+        private void DisableAllTiles()
+        {
+            foreach (var tile in tiles)
+                tile.Disable();
+        }
+
+        private void Exit(object s, RoutedEventArgs e) 
+            => Application.Current.Shutdown();
+
     }
 }

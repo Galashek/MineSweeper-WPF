@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.32428.217
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MineSweeperWPF", "MineSweeperWPF\MineSweeperWPF.csproj", "{62F1E442-2ED1-4DF6-9B7E-6CC0BAA5AA72}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MineSweeperWPF", "MineSweeperWPF\MineSweeperWPF.csproj", "{62F1E442-2ED1-4DF6-9B7E-6CC0BAA5AA72}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

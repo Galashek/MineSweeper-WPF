@@ -12,7 +12,7 @@ namespace MineSweeperWPF
 {
     class Tile : Button
     {
-        public Position Position { get; set; }
+        public Position Position { get; init; }
         //public Image Image { get; private set; }
         //public TMP_Text Text { get; private set; }
         private bool disabled;
@@ -23,9 +23,7 @@ namespace MineSweeperWPF
         public Tile()
         {
             PreviewMouseDown += Tile_MouseUp;
-            Background = Brushes.WhiteSmoke;
-            
-
+            Background = Brushes.WhiteSmoke;            
         }
 
         private void Tile_MouseUp(object sender, MouseButtonEventArgs e)
@@ -41,24 +39,9 @@ namespace MineSweeperWPF
             }
         }
 
-        //void Awake()
-        //{
-        //    Image = GetComponent<Image>();
-        //    Text = GetComponentInChildren<TMP_Text>();
-        //}
-
         public void Disable()
         {
             disabled = true;
         }
-
-        //public void OnPointerClick(PointerEventData eventData)
-        //{
-        //    if (disabled) return;
-        //    if (eventData.button == PointerEventData.InputButton.Left)
-        //        LeftClick?.Invoke(Position);
-        //    else if (eventData.button == PointerEventData.InputButton.Right)
-        //        RightClick?.Invoke(Position);
-        //}
     }
 }

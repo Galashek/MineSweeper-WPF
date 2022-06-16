@@ -5,29 +5,27 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MineSweeperWPF"              
         mc:Ignorable="d"        
-        Title="MainWindow" Height="450" Width="800" ResizeMode="NoResize"
+        Title="MainWindow" Height="450" Width="450" ResizeMode="NoResize"
         x:Name="window">
     <DockPanel>
-        <Menu x:Name="menu" Height="25" VerticalAlignment="Center" DockPanel.Dock="Top">
+        <Menu x:Name="menu" Height="25" VerticalAlignment="Center" DockPanel.Dock="Top" Background="Gainsboro">
             <MenuItem Header="Game">
-                <MenuItem Header="New game" ></MenuItem>
+                <MenuItem Header="Easy" Click="StartEasyGame"></MenuItem>
+                <MenuItem Header="Medium" Click="StartMediumGame"></MenuItem>
+                <MenuItem Header="Hard" Click="StartHardGame"></MenuItem>
+                <MenuItem Header="Custom..." Click="StartCustomGame"></MenuItem>
                 <Separator />
-                <MenuItem Header="Easy"></MenuItem>
-                <MenuItem Header="Medium" ></MenuItem>
-                <MenuItem Header="Hard"></MenuItem>
-                <MenuItem Header="Custom..."></MenuItem>
-                <Separator />
-                <MenuItem Header="Exit" ></MenuItem>
+                <MenuItem Header="Exit" Click="Exit"></MenuItem>
             </MenuItem>
         </Menu>
-        <Grid x:Name="gamePanel" DockPanel.Dock="Top" Background="Bisque" Height="40">
+        <Grid x:Name="gamePanel" DockPanel.Dock="Top" Background="Gainsboro" Height="40">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Label x:Name="minesCountLabel" Content="000" FontSize="22" Grid.Column="0"/>
-            <Button x:Name="restartBtn" Width="50" Height="30" Margin="10 5" Content="Restart" Click="Button_Click" Grid.Column="1"/>
+            <Button x:Name="restartBtn" Width="50" Height="30" Margin="10 5" Content="Restart" Click="Restart" Grid.Column="1"/>
         </Grid>
         <UniformGrid x:Name="field" Background="RoyalBlue">
         </UniformGrid>
