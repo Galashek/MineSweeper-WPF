@@ -1,4 +1,4 @@
-﻿namespace MineSweeperWPF
+﻿namespace MineSweeper
 {
     internal class FieldState
     {

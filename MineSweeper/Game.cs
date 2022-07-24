@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MineSweeperWPF
+namespace MineSweeper
 {
     public class Game
     {

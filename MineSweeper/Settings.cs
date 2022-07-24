@@ -1,4 +1,4 @@
-﻿namespace MineSweeperWPF
+﻿namespace MineSweeper
 {
     public class Settings
     {
