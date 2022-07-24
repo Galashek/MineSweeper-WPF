@@ -1,52 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MineSweeperWPF
 {
-    class Field
+    internal class Field
     {
-        // -1 - мина
-        // 0-8 - количество мин в соседних клетках
-        public readonly int Columns;
-        public readonly int Rows;
-        public readonly int Mines;
-        public readonly Position[] MinePositions;
-        private readonly int[,] FieldArray;
-        //private readonly (int,int)[,][] Neighbors;
+        private readonly int[,] field;
+        private readonly Position[] minePositions;
+
+        public readonly int Rows, Columns, Mines;
+        public IEnumerable<Position> MinePositions => minePositions;
 
         public Field(int rows, int columns, int mines)
-        {
-            if (mines >= columns * rows)
-                throw new ArgumentException();
-            if (mines < 0 || columns <= 0 || rows <= 0)
-                throw new ArgumentException();
-            Columns = columns;
-            Rows = rows;
-            Mines = mines;
-            FieldArray = new int[rows, columns];
-            MinePositions = new Position[mines];
-            //Neighbors = new (int, int)[rows, columns][];
+        {            
+            (Rows, Columns, Mines) = (rows, columns, mines);
+            field = new int[rows, columns];
+            minePositions = new Position[mines];
         }
 
-        public int this[int index1, int index2] => FieldArray[index1, index2];
-        public int this[Position position] => FieldArray[position.Row, position.Column];
-
-        public void CreateOnClick(int rowEx, int columnEx)
+        public int this[Position pos]
         {
-            if (FieldArray == null)
-                throw new Exception("Grid is not initialized!");
-            SetMines(rowEx * Columns + columnEx);
+            get => field[pos.Row, pos.Column];
+            private set => field[pos.Row, pos.Column] = value;
+        }
+
+        public void Init(Position startPoint)
+        {
+            SetMines(startPoint);
             SetNumbers();
         }
 
-        //Reservoir sampling Simple
-        private void SetMines(int exclude)
+        //Reservoir sampling - Algorithm R
+        private void SetMines(Position start)
         {
-            var rnd = new System.Random();
-            var R = new int[Mines]; // Номера ячеек по порядку где стоят мины
+            var rnd = new Random();
+            var R = new int[Mines];
+            var exclude = start.Row * Columns + start.Column;
 
             for (int i = 0; i < Mines; i++)
                 R[i] = i;
@@ -70,12 +60,11 @@ namespace MineSweeperWPF
                         R[j] = i;
                 }
             }
-
             for (int i = 0; i < Mines; i++)
             {
                 var pos = new Position(R[i] / Columns, R[i] % Columns);
-                FieldArray[pos.Row, pos.Column] = -1;
-                MinePositions[i] = pos;
+                this[pos] = -1; // -1 = Mine
+                minePositions[i] = pos;
             }
         }
 
@@ -83,49 +72,32 @@ namespace MineSweeperWPF
         {
             for (int i = 0; i < Rows; i++)
                 for (int j = 0; j < Columns; j++)
-                    if (FieldArray[i, j] != -1)
-                    {
-                        FieldArray[i, j] = GetNearMinesCount(i, j);
-                        //Neighbors[i, j] = FindNearby(i, j);
-                    }
+                {
+                    var pos = new Position(i, j);
+                    if (!IsMine(pos))
+                        this[pos] = NearbyOf(pos).Count(IsMine);
+                }           
         }
 
-        private int GetNearMinesCount(int row, int col)
+        private bool IsMine(Position pos) => this[pos] == -1;
+
+        private bool InBounds(Position pos)
         {
-            //int k = 0;
-            //for (int i = row - 1; i <= row + 1; i++)
-            //    for (int j = col - 1; j <= col + 1; j++)
-            //        if (i >= 0 && j >= 0 && i < Rows && j < Columns)
-            //            if (GridArray[i, j] == -1) k++;
-            //return k;
-
-            int[] d = { -1, 0, 1 };
-            return d.SelectMany(x => d.Select(y => (row + x, col + y)))
-                .Count(x => x.Item1 >= 0 && x.Item1 < Rows
-                       && x.Item2 >= 0 && x.Item2 < Columns && x != (row, col)
-                       && FieldArray[x.Item1, x.Item2] == -1);
+            return pos.Row >= 0 && pos.Row < Rows &&
+                pos.Column >= 0 && pos.Column < Columns;
         }
 
-        //public (int, int)[] FindNearby(int row, int col)
-        //{
-        //    int[] d = { -1, 0, 1 };
-        //    return d.SelectMany(x => d.Select(y => (row + x, col + y)))
-        //            .Where(x => x.Item1 >= 0 && x.Item1 < Rows 
-        //                     && x.Item2 >= 0 && x.Item2 < Columns
-        //                     && x != (row, col))
-        //            .ToArray();
-        //}
-
-        public Position[] FindNearby(Position pos)
+        public IEnumerable<Position> NearbyOf(Position pos)
         {
-            int[] d = { -1, 0, 1 };
-            return d.SelectMany(x => d.Select(y => new Position(pos.Row + x, pos.Column + y)))
-                .Where(x => x.Row >= 0 && x.Row < Rows
-                                       && x.Column >= 0 && x.Column < Columns
-                                       && !x.Equals(pos))
-                .ToArray();
+            int row = pos.Row;
+            int col = pos.Column;
+            for (int i = row - 1; i <= row + 1; i++)
+                for (int j = col - 1; j <= col + 1; j++)
+                {
+                    var p = new Position(i, j);
+                    if (InBounds(p) && p != pos)
+                        yield return p;
+                }
         }
-
-        //public (int, int)[] GetNeighbors(int row, int col) => Neighbors[row, col];
     }
 }

@@ -3,10 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:MineSweeperWPF"
         mc:Ignorable="d"
-        Title="Custom settings" Height="250" Width="250" ResizeMode="NoResize" ShowInTaskbar="False" WindowStyle="ToolWindow" FontSize="18">
+        Title="Custom settings" Height="250" Width="350" ResizeMode="NoResize" 
+        ShowInTaskbar="False" WindowStyle="ToolWindow" FontSize="18"
+        WindowStartupLocation="CenterOwner">
     <Grid >
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -15,28 +16,38 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <WrapPanel Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Width="80" Margin="0,0,15,0">Rows</TextBlock>
-            <TextBox x:Name="rowsBox" x:FieldModifier="private" Width="60" Text="15"/>
+            <TextBlock Width="80">Rows</TextBlock>
+
+            <Slider x:Name="rowsSlider" Minimum="5" Maximum="30" Width="150"                    
+                    IsSnapToTickEnabled="True"></Slider>
+            
+            <TextBlock x:Name="rowsText" Width="50" TextAlignment="Right"
+                       Text="{Binding ElementName=rowsSlider, Path=Value}"></TextBlock>
         </WrapPanel >
+        
         <WrapPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Width="80" Margin="0,0,15,0">Columns</TextBlock>
-            <TextBox x:Name="columnsBox" x:FieldModifier="private" Width="60" Text="15"/>
+            <TextBlock Width="80">Columns</TextBlock>
+
+            <Slider x:Name="columnsSlider" Minimum="5" Maximum="30" Width="150"
+                    IsSnapToTickEnabled="True"></Slider>
+            
+            <TextBlock x:Name="columnsText" Width="50" TextAlignment="Right"
+                       Text="{Binding ElementName=columnsSlider, Path=Value}"></TextBlock>
         </WrapPanel>
+        
         <WrapPanel Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock  Width="80" Margin="0,0,15,0">Mines</TextBlock>
-            <TextBox x:Name="minesBox" x:FieldModifier="private" Width="60" Text="15"/>
+            <TextBlock Width="80">Mines</TextBlock>
+
+            <Slider x:Name="minesSlider" Minimum="1" Width="150"
+                    IsSnapToTickEnabled="True"></Slider>
+
+            <TextBlock x:Name="minesText" Width="50" TextAlignment="Right"
+                       Text="{Binding ElementName=minesSlider, Path=Value}"></TextBlock>
         </WrapPanel>
+         
         <WrapPanel Grid.Row="3" HorizontalAlignment="Right">
-            <Button IsDefault="True" Click="Accept_Click" Width="60" Margin="0,15,10,0" FontSize="12">OK</Button>
+            <Button x:Name="ok" IsDefault="True" Click="Accept_Click" Width="60" Margin="0,15,10,0" FontSize="12">OK</Button>
             <Button IsCancel="True" Width="60" Margin="0,15,10,0" FontSize="12">Cancel</Button>
-            <xctk:MaskedTextBox 
-x:Name="CNIC" 
-Mask="00"                                
-CaretIndex="0"  
-ValueDataType="{x:Type s:String}" 
-Margin="20,0,0,0" 
-FontSize="14">
-            </xctk:MaskedTextBox>
         </WrapPanel>        
     </Grid>
 </Window>

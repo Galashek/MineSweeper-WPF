@@ -1,32 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MineSweeperWPF
+﻿namespace MineSweeperWPF
 {
-    public class Position
+    public struct Position
     {
         public readonly int Row;
         public readonly int Column;
 
-        public Position(int row, int column)
-        {
-            Row = row;
-            Column = column;
-        }
+        public Position(int row, int column) => (Row, Column) = (row, column);
 
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Position)) return false;
-            var pos = (Position)obj;
-            return Row == pos.Row && Column == pos.Column;
-        }
+        public override bool Equals(object obj) => obj is Position pos && Row == pos.Row && Column == pos.Column;
 
-        public override int GetHashCode()
-        {
-            return (Row * 397) ^ Column;
-        }
+        public override int GetHashCode() => (Row * 397) ^ Column;
+
+        public static bool operator ==(Position left, Position right) => left.Equals(right);
+
+        public static bool operator !=(Position left, Position right) => !(left == right);
     }
 }

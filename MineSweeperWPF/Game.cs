@@ -7,13 +7,13 @@ using System.Windows;
 
 namespace MineSweeperWPF
 {
-    class GameState
+    public class Game
     {
         private readonly int rows, columns, mines;
         private readonly Field grid;
         private readonly bool[,] tileOpened;
         private readonly bool[,] tileFlagged;
-        private int openedCounter;
+        private int openedCount;
         private bool first;
         public int MinesLeft { get; private set; }
 
@@ -21,17 +21,17 @@ namespace MineSweeperWPF
         public event Action<Position, int> TileOpen;
         public event Action<Position, bool> FlagSet;
         public event Action AllTilesOpened;
-        public event Action<Position[]> MineOpen;
+        public event Action<IEnumerable<Position>> MineOpen;
         public event Action Failed;
 
-        public GameState(Settings settings, MainWindow game)
+        public Game(Settings settings)
         {
             (rows, columns, mines) = settings;
             grid = new Field(rows, columns, mines);
             tileOpened = new bool[rows, columns];
             tileFlagged = new bool[rows, columns];
             MinesLeft = mines;
-            openedCounter = 0;
+            openedCount = 0;
             first = true;
         }        
 
@@ -48,7 +48,7 @@ namespace MineSweeperWPF
             {
                 if (first)
                 {
-                    grid.CreateOnClick(pos.Row, pos.Column);
+                    grid.Init(pos);
                     FirstTileOpen?.Invoke();
                     first = false;
                 }
@@ -74,14 +74,14 @@ namespace MineSweeperWPF
 
                 if (grid[pos] == 0)
                 {
-                    foreach (var otherPos in grid.FindNearby(pos))
+                    foreach (var otherPos in grid.NearbyOf(pos))
                     {
                         if (!tileOpened[otherPos.Row, otherPos.Column])
                             SetOpened(otherPos);
                     }
                 }
 
-                if (++openedCounter == rows * columns - mines)
+                if (++openedCount == rows * columns - mines)
                 {
                     AllTilesOpened?.Invoke();
                 }
@@ -91,7 +91,7 @@ namespace MineSweeperWPF
         private void SetNearOpened(Position pos)
         {
             if (grid[pos] == 0) return;
-            var nearby = grid.FindNearby(pos);
+            var nearby = grid.NearbyOf(pos).ToArray();
             if (nearby.Count(x => tileFlagged[x.Row, x.Column]) != grid[pos]) return;
             foreach (var p in nearby)
             {

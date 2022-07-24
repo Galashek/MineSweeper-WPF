@@ -1,34 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿using System.Windows;
 
 namespace MineSweeperWPF
 {
     public partial class CustomSettingsWindow : Window
     {
-        public Settings Settings => new(
-            int.Parse(rowsBox.Text), 
-            int.Parse(columnsBox.Text), 
-            int.Parse(minesBox.Text)
-            );
-        //public int Rows => int.Parse(rowsBox.Text);
-        //public int Columns => int.Parse(columnsBox.Text);
-        //public int Mines => int.Parse(minesBox.Text);
+        public Settings Settings => new(Rows, Columns, Mines);
+
+        private int Rows => (int)rowsSlider.Value;
+        private int Columns => (int)columnsSlider.Value;
+        private int Mines => (int)minesSlider.Value;
 
         public CustomSettingsWindow()
         {
             InitializeComponent();
+            rowsSlider.ValueChanged += (s, e) => UpdateMinesMaximum();
+            columnsSlider.ValueChanged += (s, e) => UpdateMinesMaximum();
         }
+
+        private void UpdateMinesMaximum() => minesSlider.Maximum = Rows * Columns - 1;
 
         private void Accept_Click(object sender, RoutedEventArgs e)
         {
