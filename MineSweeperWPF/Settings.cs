@@ -20,7 +20,7 @@
             (rows, columns, mines) = (Rows, Columns, Mines);
         }
 
-        public static Settings Easy => new(9, 9, 12);
+        public static Settings Easy => new(9, 9, 10);
         public static Settings Medium => new(16, 16, 45);
         public static Settings Hard => new(16, 30, 99);
     }

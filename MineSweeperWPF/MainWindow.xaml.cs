@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -11,7 +9,7 @@ namespace MineSweeperWPF
 {
     public partial class MainWindow : Window
     {
-        private Game gameState;
+        private Game game;
         private Settings currentSettings;
 
         private Tile[,] tiles;
@@ -32,11 +30,11 @@ namespace MineSweeperWPF
         private void CreateGame(Settings settings)
         {
             currentSettings = settings;
-            (var rows, var columns, var mines) = currentSettings;
+            var (rows, columns, mines) = currentSettings;
             ResizeWindow(rows, columns);
 
             minesCountLabel.Content = mines.ToString();
-            gameState = new Game(currentSettings);
+            game = new Game(currentSettings);
             
             tiles = new Tile[rows, columns];
 
@@ -51,34 +49,31 @@ namespace MineSweeperWPF
                     field.Children.Add(tile);
                 }
             }
-            gameState.FirstTileOpen += StartGame;
-            gameState.AllTilesOpened += Win;
-            gameState.Failed += Lose;
-            gameState.FlagSet += (x, y) => minesCountLabel.Content = gameState.MinesLeft.ToString();
-            gameState.TileOpen += OpenTile;
-            gameState.FlagSet += FlagTile;
-            gameState.MineOpen += Explode;
-            gameState.AllTilesOpened += DisableAllTiles;
+            game.Start += StartGame;
+            game.Win += Win;
+            game.Lose += Lose;
+            game.FlagStateChanged += (x, y) => minesCountLabel.Content = game.MinesLeft.ToString();
+            game.CellOpened += OpenTile;
+            game.FlagStateChanged += FlagTile;
+            game.Win += DisableAllTiles;
         }
 
         private void Tile_Click(object sender, MouseButtonEventArgs e)
         {
-            var tile = (Tile)e.Source;
-
+            var pos = (e.Source as Tile).Position;
             if (e.ChangedButton == MouseButton.Left)
             {
-                gameState.HandleClick(tile.Position, false);
+                game.HandleOpen(pos);
             }
             else if (e.ChangedButton == MouseButton.Right)
             {
-                gameState.HandleClick(tile.Position, true);
+                game.Flag(pos);
             }
         }
 
         private void StartGame()
         {
-            //timer.StartTimer();
-            
+            //timer.StartTimer();            
         }
 
         private void Win()
@@ -90,7 +85,7 @@ namespace MineSweeperWPF
         private void Lose()
         {
             //timer.StopTimer();
-            //MessageBox.Show("You lose");
+            Explode(game.MinePositions);
         }
 
         private void Restart(object s, RoutedEventArgs e)
@@ -130,7 +125,7 @@ namespace MineSweeperWPF
             else
                 tiles[pos.Row, pos.Column].IsHitTestVisible = false;
         }
-
+        
         private void FlagTile(Position pos, bool state)
         {
             tiles[pos.Row, pos.Column].Background = state ? flagged : empty;
@@ -151,6 +146,5 @@ namespace MineSweeperWPF
 
         private void Exit(object s, RoutedEventArgs e) 
             => Application.Current.Shutdown();
-
     }
 }

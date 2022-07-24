@@ -7,16 +7,23 @@ namespace MineSweeperWPF
     internal class Field
     {
         private readonly int[,] field;
-        private readonly Position[] minePositions;
-
         public readonly int Rows, Columns, Mines;
-        public IEnumerable<Position> MinePositions => minePositions;
+        public IEnumerable<Position> MinePositions() => Positions.Where(IsMine);
+
+        private IEnumerable<Position> Positions
+        {
+            get
+            {
+                for (int i = 0; i < Rows; i++)
+                    for (int j = 0; j < Columns; j++)
+                        yield return new Position(i, j);
+            }
+        }
 
         public Field(int rows, int columns, int mines)
         {            
             (Rows, Columns, Mines) = (rows, columns, mines);
             field = new int[rows, columns];
-            minePositions = new Position[mines];
         }
 
         public int this[Position pos]
@@ -64,22 +71,19 @@ namespace MineSweeperWPF
             {
                 var pos = new Position(R[i] / Columns, R[i] % Columns);
                 this[pos] = -1; // -1 = Mine
-                minePositions[i] = pos;
             }
         }
 
         private void SetNumbers()
         {
-            for (int i = 0; i < Rows; i++)
-                for (int j = 0; j < Columns; j++)
-                {
-                    var pos = new Position(i, j);
-                    if (!IsMine(pos))
-                        this[pos] = NearbyOf(pos).Count(IsMine);
-                }           
+            foreach (var pos in Positions)
+            {
+                if (!IsMine(pos))
+                    this[pos] = NearbyOf(pos).Count(IsMine);
+            }
         }
 
-        private bool IsMine(Position pos) => this[pos] == -1;
+        public bool IsMine(Position pos) => this[pos] == -1;
 
         private bool InBounds(Position pos)
         {

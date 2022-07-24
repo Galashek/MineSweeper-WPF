@@ -1,112 +1,95 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace MineSweeperWPF
 {
     public class Game
     {
-        private readonly int rows, columns, mines;
-        private readonly Field grid;
-        private readonly bool[,] tileOpened;
-        private readonly bool[,] tileFlagged;
-        private int openedCount;
+        private readonly Field field;
+        private readonly FieldState state;
+        private int openLeft;
         private bool first;
-        public int MinesLeft { get; private set; }
 
-        public event Action FirstTileOpen;
-        public event Action<Position, int> TileOpen;
-        public event Action<Position, bool> FlagSet;
-        public event Action AllTilesOpened;
-        public event Action<IEnumerable<Position>> MineOpen;
-        public event Action Failed;
+        public event Action Start, Win, Lose;
+        public event Action<Position, int> CellOpened;
+        public event Action<Position, bool> FlagStateChanged;
+
+        public int MinesLeft { get; private set; }
+        public IEnumerable<Position> MinePositions => field.MinePositions();
 
         public Game(Settings settings)
         {
-            (rows, columns, mines) = settings;
-            grid = new Field(rows, columns, mines);
-            tileOpened = new bool[rows, columns];
-            tileFlagged = new bool[rows, columns];
+            var (rows, columns, mines) = settings;
+            field = new Field(rows, columns, mines);
+            state = new FieldState(rows, columns);
             MinesLeft = mines;
-            openedCount = 0;
+            openLeft = rows * columns - mines;
             first = true;
         }        
 
-        public void HandleClick(Position pos, bool flagging)
+        public void HandleOpen(Position pos)
         {
-            if (flagging)
-            {
-                SetFlag(pos);
-                return;
-            }
-            if (tileFlagged[pos.Row, pos.Column]) return;
-            if (tileOpened[pos.Row, pos.Column]) SetNearOpened(pos);
+            if (state.IsFlagged(pos)) return;
+            if (state.IsOpened(pos)) 
+                OpenNearbyOf(pos);
             else
             {
                 if (first)
                 {
-                    grid.Init(pos);
-                    FirstTileOpen?.Invoke();
+                    field.Init(pos);
+                    Start?.Invoke();
                     first = false;
                 }
-                SetOpened(pos);
+                Open(pos);
             }
         }
 
-        private void SetOpened(Position pos)
+        public void Flag(Position pos)
         {
-            if (tileFlagged[pos.Row, pos.Column])
-                SetFlag(pos);
+            if (state.IsOpened(pos)) return;
+            state.ChangeFlagState(pos);
+            var isFlagged = state.IsFlagged(pos);
+            MinesLeft += isFlagged ? -1 : 1;
+            FlagStateChanged?.Invoke(pos, isFlagged);
+        }
 
-            tileOpened[pos.Row, pos.Column] = true;
-
-            if (grid[pos] == -1)
+        private void Open(Position pos)
+        {
+            if (field.IsMine(pos))
             {
-                MineOpen?.Invoke(grid.MinePositions);
-                Failed?.Invoke();
+                Lose?.Invoke();
             }
             else
             {
-                TileOpen?.Invoke(pos, grid[pos]);
+                state.Open(pos);
+                CellOpened?.Invoke(pos, field[pos]);
 
-                if (grid[pos] == 0)
+                if (field[pos] == 0)
                 {
-                    foreach (var otherPos in grid.NearbyOf(pos))
+                    foreach (var near in field.NearbyOf(pos))
                     {
-                        if (!tileOpened[otherPos.Row, otherPos.Column])
-                            SetOpened(otherPos);
+                        if (!state.IsOpened(near))
+                            Open(near);
                     }
                 }
-
-                if (++openedCount == rows * columns - mines)
+                if (--openLeft == 0)
                 {
-                    AllTilesOpened?.Invoke();
+                    Win?.Invoke();
                 }
             }
         }
 
-        private void SetNearOpened(Position pos)
+        private void OpenNearbyOf(Position pos)
         {
-            if (grid[pos] == 0) return;
-            var nearby = grid.NearbyOf(pos).ToArray();
-            if (nearby.Count(x => tileFlagged[x.Row, x.Column]) != grid[pos]) return;
+            if (field[pos] == 0) return;
+            var nearby = field.NearbyOf(pos).ToArray();
+            if (nearby.Count(p => state.IsFlagged(p)) != field[pos]) return;
             foreach (var p in nearby)
             {
-                if (!tileOpened[p.Row, p.Column] && !tileFlagged[p.Row, p.Column])
-                    SetOpened(p);
+                if (!state.IsOpened(p) && !state.IsFlagged(p))
+                    Open(p);
             }
-        }
-
-        private void SetFlag(Position pos)
-        {
-            if (tileOpened[pos.Row, pos.Column]) return;
-            var newState = !tileFlagged[pos.Row, pos.Column];
-            tileFlagged[pos.Row, pos.Column] = newState;
-            MinesLeft += newState ? -1 : 1;
-            FlagSet?.Invoke(pos, newState);
         }
     }
 }
