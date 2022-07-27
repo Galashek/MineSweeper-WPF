@@ -1,24 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
 using MineSweeper;
 
 namespace MineSweeperWPF
 {
-    class Tile : Button
+    public class Tile : Button
     {
-        public Position Position { get; }
+        public Position Position { get; set; }
 
-        public Tile(Position position)
+        public void ChangeImage(Style style)
         {
-            Position = position;
-            Background = Brushes.WhiteSmoke;            
+            Style = style;
+        }
+
+        public static readonly DependencyProperty NumberProperty =
+        DependencyProperty.Register("Number", typeof(string),
+        typeof(Tile), new UIPropertyMetadata(""));
+
+        public string Number
+        {
+            get => (string)GetValue(NumberProperty);
+            set => SetValue(NumberProperty, value);
         }
     }
 }

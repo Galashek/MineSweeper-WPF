@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using MineSweeper;
 
 namespace MineSweeperWPF
@@ -14,27 +16,29 @@ namespace MineSweeperWPF
         private Settings currentSettings;
 
         private Tile[,] tiles;
-        public Brush
-            empty = Brushes.White,
-            opened = Brushes.SlateGray,
-            flagged = Brushes.RoyalBlue,
-            failed = Brushes.IndianRed;
+        public Style empty, opened, flagged, failed;
 
         //public Timer timer;
 
         public MainWindow()
         {
             InitializeComponent();
+
+            empty = Resources["empty"] as Style;
+            opened = Resources["opened"] as Style;
+            flagged = Resources["flagged"] as Style;
+            failed = Resources["failed"] as Style;
+
             CreateGame(Settings.Easy);
         }
 
         private void CreateGame(Settings settings)
         {
             currentSettings = settings;
-            var (rows, columns, mines) = currentSettings;
+            var (rows, columns, mines) = settings;
             ResizeWindow(rows, columns);
 
-            minesCountLabel.Content = mines.ToString();
+            minesCountLabel.Text = mines.ToString();
             game = new Game(currentSettings);
             
             tiles = new Tile[rows, columns];
@@ -44,8 +48,13 @@ namespace MineSweeperWPF
             {
                 for (int j = 0; j < columns; j++)
                 {
-                    var tile = new Tile(new Position(i, j));
+                    var tile = new Tile()
+                    {
+                        Position = new Position(i, j)
+                    };
+                    tile.ChangeImage(empty);
                     tile.PreviewMouseDown += Tile_Click;
+                    //tile.PreviewMouseDown += (s,e) => MessageBox.Show("Click");
                     tiles[i, j] = tile;
                     field.Children.Add(tile);
                 }
@@ -53,7 +62,7 @@ namespace MineSweeperWPF
             game.Start += StartGame;
             game.Win += Win;
             game.Lose += Lose;
-            game.FlagStateChanged += (x, y) => minesCountLabel.Content = game.MinesLeft.ToString();
+            game.FlagStateChanged += (x, y) => minesCountLabel.Text = game.MinesLeft.ToString();
             game.CellOpened += OpenTile;
             game.FlagStateChanged += FlagTile;
             game.Win += DisableAllTiles;
@@ -61,14 +70,14 @@ namespace MineSweeperWPF
 
         private void Tile_Click(object sender, MouseButtonEventArgs e)
         {
-            var pos = (e.Source as Tile).Position;
+            if (e.Source is not Tile tile) return;
             if (e.ChangedButton == MouseButton.Left)
             {
-                game.HandleOpen(pos);
+                game.HandleOpen(tile.Position);
             }
             else if (e.ChangedButton == MouseButton.Right)
             {
-                game.Flag(pos);
+                game.Flag(tile.Position);
             }
         }
 
@@ -80,7 +89,7 @@ namespace MineSweeperWPF
         private void Win()
         {
             //timer.StopTimer();
-            MessageBox.Show("You win");
+            MessageBox.Show("You win");            
         }
 
         private void Lose()
@@ -120,23 +129,23 @@ namespace MineSweeperWPF
 
         private void OpenTile(Position pos, int mineCount)
         {
-            tiles[pos.Row, pos.Column].Background = opened;
+            tiles[pos.Row, pos.Column].ChangeImage(opened);
             if (mineCount > 0)
-                tiles[pos.Row, pos.Column].Content = mineCount.ToString();
+                tiles[pos.Row, pos.Column].Number = mineCount.ToString();
             else
                 tiles[pos.Row, pos.Column].IsHitTestVisible = false;
         }
         
         private void FlagTile(Position pos, bool state)
         {
-            tiles[pos.Row, pos.Column].Background = state ? flagged : empty;
+            tiles[pos.Row, pos.Column].ChangeImage(state ? flagged : empty);
         }
 
         private void Explode(IEnumerable<Position> mines)
         {
             DisableAllTiles();
             foreach (var pos in mines)
-                tiles[pos.Row, pos.Column].Background = failed;
+                tiles[pos.Row, pos.Column].ChangeImage(failed);
         }
 
         private void DisableAllTiles()
