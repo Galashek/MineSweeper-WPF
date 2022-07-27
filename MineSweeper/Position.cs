@@ -14,5 +14,10 @@
         public static bool operator ==(Position left, Position right) => left.Equals(right);
 
         public static bool operator !=(Position left, Position right) => !(left == right);
+
+        public override string ToString()
+        {
+            return $"Row:{Row} Col:{Column}";
+        }
     }
 }

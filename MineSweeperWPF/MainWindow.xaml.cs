@@ -16,7 +16,7 @@ namespace MineSweeperWPF
         private Settings currentSettings;
 
         private Tile[,] tiles;
-        public Style empty, opened, flagged, failed;
+        public Style empty, opened, flagged, failed, pressed;
 
         //public Timer timer;
 
@@ -28,6 +28,7 @@ namespace MineSweeperWPF
             opened = Resources["opened"] as Style;
             flagged = Resources["flagged"] as Style;
             failed = Resources["failed"] as Style;
+            pressed = Resources["pressed"] as Style;
 
             CreateGame(Settings.Easy);
         }
@@ -52,11 +53,14 @@ namespace MineSweeperWPF
                     {
                         Position = new Position(i, j)
                     };
-                    tile.ChangeImage(empty);
-                    tile.PreviewMouseDown += Tile_Click;
-                    //tile.PreviewMouseDown += (s,e) => MessageBox.Show("Click");
+                    tile.ChangeStyle(empty);
+                    tile.MouseLeftButtonUp += Tile_MouseLeftButtonUp;
+                    tile.MouseRightButtonDown += Tile_MouseRightButtonDown;
+                    tile.MouseEnter += Tile_MouseEnter;
+                    tile.MouseLeave += Tile_MouseLeave;
+                    tile.MouseLeftButtonDown += Tile_MouseLeftButtonDown;
                     tiles[i, j] = tile;
-                    field.Children.Add(tile);
+                    field.Children.Add(tile);                    
                 }
             }
             game.Start += StartGame;
@@ -68,17 +72,81 @@ namespace MineSweeperWPF
             game.Win += DisableAllTiles;
         }
 
-        private void Tile_Click(object sender, MouseButtonEventArgs e)
+        private void Tile_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.Source is not Tile tile) return;
-            if (e.ChangedButton == MouseButton.Left)
+            if (tile.Style == empty)
+                tile.ChangeStyle(pressed);
+            if (tile.Style == opened)
+                MarkNearTilesToOpen(tile.Position);
+        }
+
+        private IEnumerable<Tile> Nearby(Position pos)
+        {
+            for (int i = pos.Row - 1; i <= pos.Row + 1; i++)
             {
-                game.HandleOpen(tile.Position);
+                if (i < 0 || i >= currentSettings.Rows) continue;
+                for (int j = pos.Column - 1; j <= pos.Column + 1; j++)
+                {
+                    if (j < 0 || j >= currentSettings.Columns) continue;
+                    if (i == pos.Row && j == pos.Column) continue;
+                    yield return tiles[i, j];
+                }
             }
-            else if (e.ChangedButton == MouseButton.Right)
+        }
+
+        private void MarkNearTilesToOpen(Position pos)
+        {
+            foreach (var t in Nearby(pos))
             {
-                game.Flag(tile.Position);
+                if (t.Style == empty)
+                    t.ChangeStyle(pressed);
             }
+        }
+
+        private void UnmarkNearTilesToOpen(Position pos)
+        {
+            foreach (var t in Nearby(pos))
+            {
+                if (t.Style == pressed)
+                    t.ChangeStyle(empty);
+            }
+        }
+
+        private void Tile_MouseLeave(object sender, MouseEventArgs e)
+        {
+            if (e.Source is not Tile tile) return;
+            if (tile.Style == pressed)
+                tile.ChangeStyle(empty);
+            if (tile.Style == opened)
+                UnmarkNearTilesToOpen(tile.Position);
+
+        }
+
+        private void Tile_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (e.Source is not Tile tile) return;
+            if (Mouse.LeftButton == MouseButtonState.Pressed)
+            {
+                if (tile.Style == empty)
+                    tile.ChangeStyle(pressed);
+                if (tile.Style == opened)
+                    MarkNearTilesToOpen(tile.Position);
+            }
+        }
+
+        private void Tile_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.Source is not Tile tile) return;
+            game.Flag(tile.Position);            
+        }
+
+        private void Tile_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.Source is not Tile tile) return;
+            game.HandleOpen(tile.Position);
+            if (tile.Style == opened)
+                UnmarkNearTilesToOpen(tile.Position);
         }
 
         private void StartGame()
@@ -89,7 +157,10 @@ namespace MineSweeperWPF
         private void Win()
         {
             //timer.StopTimer();
-            MessageBox.Show("You win");            
+            foreach (var mine in game.MinePositions)
+                tiles[mine.Row, mine.Column].ChangeStyle(flagged);
+
+            MessageBox.Show("You win");
         }
 
         private void Lose()
@@ -129,7 +200,7 @@ namespace MineSweeperWPF
 
         private void OpenTile(Position pos, int mineCount)
         {
-            tiles[pos.Row, pos.Column].ChangeImage(opened);
+            tiles[pos.Row, pos.Column].ChangeStyle(opened);
             if (mineCount > 0)
                 tiles[pos.Row, pos.Column].Number = mineCount.ToString();
             else
@@ -138,14 +209,14 @@ namespace MineSweeperWPF
         
         private void FlagTile(Position pos, bool state)
         {
-            tiles[pos.Row, pos.Column].ChangeImage(state ? flagged : empty);
+            tiles[pos.Row, pos.Column].ChangeStyle(state ? flagged : empty);
         }
 
         private void Explode(IEnumerable<Position> mines)
         {
             DisableAllTiles();
             foreach (var pos in mines)
-                tiles[pos.Row, pos.Column].ChangeImage(failed);
+                tiles[pos.Row, pos.Column].ChangeStyle(failed);
         }
 
         private void DisableAllTiles()

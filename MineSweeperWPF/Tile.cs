@@ -4,11 +4,11 @@ using MineSweeper;
 
 namespace MineSweeperWPF
 {
-    public class Tile : Button
+    public class Tile : UserControl
     {
-        public Position Position { get; set; }
+        public Position Position { get; init; }
 
-        public void ChangeImage(Style style)
+        public void ChangeStyle(Style style)
         {
             Style = style;
         }
