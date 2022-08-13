@@ -1,0 +1,127 @@
+﻿<UserControl x:Class="MineSweeperWPF.TileGrid"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MineSweeperWPF"
+             mc:Ignorable="d"              
+             Background="#1565C0">
+    <UserControl.Resources>
+
+        <Style x:Key="empty" TargetType="local:Tile">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="local:Tile">
+                        <Border x:Name="border"
+                                Background="#FAFAFA" 
+                                BorderThickness="3"
+                                CornerRadius="5"/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>                    
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="pressed" TargetType="local:Tile">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="local:Tile">
+                        <Border Background="Transparent" 
+                                BorderBrush="Azure" 
+                                BorderThickness="3" 
+                                CornerRadius="5"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="opened" TargetType="local:Tile">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="local:Tile">
+                        <TextBlock Text="{TemplateBinding Number}" 
+                                   Foreground="White"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   TextAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   Padding="12"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="mined" TargetType="local:Tile">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="local:Tile">
+                        <Border Background="Azure" 
+                                BorderThickness="2" 
+                                CornerRadius="5">
+                            <ContentControl>
+                                <Image Source="Images/mine.png"/>
+                            </ContentControl>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="failed" TargetType="local:Tile">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="local:Tile">
+                        <Border Background="IndianRed" 
+                                BorderThickness="2" 
+                                CornerRadius="5">
+                            <ContentControl>
+                                <Image Source="Images/mine.png"/>
+                            </ContentControl>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="flagged" TargetType="local:Tile">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="local:Tile">
+                        <Grid>
+                            <Border  Background="Azure" 
+                                     BorderThickness="3"
+                                     CornerRadius="5"
+                                     >
+                                <ContentControl>
+                                    <Image Source="Images/flag.png"/>
+                                </ContentControl>
+                            </Border>
+                                <!--<Polygon Fill="CadetBlue" 
+                                     Points=" 15, 5, 30, 12, 15, 20"/>
+                            <Line X1="15" Y1="5" 
+                                  X2="15" Y2="30" 
+                                  StrokeThickness="2" 
+                                  Stroke="Black"/>-->
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+    
+    <UniformGrid x:Name="grid">
+        <UniformGrid  IsHitTestVisible="False">
+            <local:Tile Style="{StaticResource empty}"/>
+            <local:Tile Style="{StaticResource opened}" Number="10"/>
+            <local:Tile Style="{StaticResource flagged}"/>
+            <local:Tile Style="{StaticResource mined}"/>
+            <local:Tile Style="{StaticResource failed}"/>
+            <local:Tile Style="{StaticResource pressed}"/>
+        </UniformGrid>        
+    </UniformGrid>
+</UserControl>

@@ -6,70 +6,49 @@
         xmlns:local="clr-namespace:MineSweeperWPF"              
         mc:Ignorable="d"        
         Title="MainWindow" Height="450" Width="450" ResizeMode="NoResize"
-        x:Name="window">
+        x:Name="window"
+        Icon="Images/mine.png">
     <Window.Resources>
-        
-        <Style x:Key="empty" TargetType="local:Tile">
+        <Style x:Key="defaultPanel" TargetType="Grid">
+            <Setter Property="Background" Value="Azure"/>
+        </Style>
+        <Style x:Key="winPanel" TargetType="Grid">
+            <Setter Property="Background" Value="#00E676"/>
+        </Style>
+        <Style x:Key="losePanel" TargetType="Grid">
+            <Setter Property="Background" Value="IndianRed"/>
+        </Style>
+        <Style x:Key="text" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="DemiBold"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Text" Value="000"/>
+        </Style>
+        <Style x:Key="restartBtnStyle" TargetType="Button">
             <Setter Property="Template">
                 <Setter.Value>
-                    <ControlTemplate TargetType="local:Tile">
-                        <Border Background="#FAFAFA" BorderThickness="2" CornerRadius="5"/>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="buttonBorder"
+                                Background="Transparent" 
+                                Cursor="Hand"
+                                Width="40" Height="40" 
+                                BorderThickness="2" 
+                                CornerRadius="5">
+                            <ContentControl>
+                                <Image Source="Images/reset.png"/>
+                            </ContentControl>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger  Property="IsMouseOver" Value="True">
+                                <Setter TargetName="buttonBorder" Property="Background" Value="#E1F5FE"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <Style x:Key="pressed" TargetType="local:Tile">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="local:Tile">
-                        <Border Background="Transparent" BorderBrush="Azure" BorderThickness="3" CornerRadius="5"/>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="opened" TargetType="local:Tile">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="local:Tile">
-                        <Grid>
-                            <TextBlock Text="{TemplateBinding Number}" Foreground="White"
-                                   FontSize="18"
-                                   TextAlignment="Center"
-                                   VerticalAlignment="Center"/>
-                        </Grid>                                               
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="failed" TargetType="local:Tile">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="local:Tile">
-                        <Border Background="IndianRed" BorderThickness="2" CornerRadius="5"/>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        
-        <Style x:Key="flagged" TargetType="local:Tile">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="local:Tile">
-                        <Grid>
-                            <Border  Background="White" BorderThickness="2" CornerRadius="5"/>                            
-                            <Polygon Fill="Blue" Points=" 15, 5, 30, 12, 15, 20"/>
-                            <Line X1="15" Y1="5" X2="15" Y2="30" StrokeThickness="2" Stroke="Black"/>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        
     </Window.Resources>
-    
     <DockPanel>
         <Menu x:Name="menu" Height="25" VerticalAlignment="Center" DockPanel.Dock="Top" Background="White">
             <MenuItem Header="Game">
@@ -83,25 +62,38 @@
                 <MenuItem Header="Exit" Click="Exit"></MenuItem>
             </MenuItem>
         </Menu>
-        <Grid x:Name="gamePanel" DockPanel.Dock="Top" Background="Gainsboro" Height="40">
+        <Grid x:Name="gamePanel" DockPanel.Dock="Top" Height="40"
+              Style="{StaticResource defaultPanel}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <TextBlock x:Name="minesCountLabel" Text="000" FontSize="22" Grid.Column="0"/>
-            <Button x:Name="restartBtn" Width="50" Height="30" Margin="10 5"
-                    Content="Restart" Click="Restart" Grid.Column="1">
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Center">
+                <Image Source="Images/mine.png" Width="30"/>
+                <TextBlock x:Name="minesCount"
+                       Style="{StaticResource text}"/>
+            </StackPanel>
+            
+            <Button x:Name="restartBtn"                    
+                    Click="Restart" 
+                    Grid.Column="1"
+                    Style="{StaticResource restartBtnStyle}"
+                    >
+                <Image Source="Images/reset.png"/>                
             </Button>
+            
+            <StackPanel Grid.Column="2" 
+                        Orientation="Horizontal" 
+                        HorizontalAlignment="Center">
+                <Image Source="Images/clock.png" Width="30" />
+                <TextBlock x:Name="timerText" 
+                       Style="{StaticResource text}"/>
+            </StackPanel>
+                    
         </Grid>
-        <UniformGrid x:Name="field" Background="#1565C0">
-            <UniformGrid Width="150" Height="150" IsHitTestVisible="False">
-                <local:Tile Style="{StaticResource empty}"/>
-                <local:Tile Style="{StaticResource opened}" Number="10"/>
-                <local:Tile Style="{StaticResource failed}"/>
-                <local:Tile Style="{StaticResource flagged}"/>
-                <local:Tile Style="{StaticResource pressed}"/>
-            </UniformGrid>
-        </UniformGrid>
+        <local:TileGrid x:Name="view"/>
     </DockPanel>
 </Window>

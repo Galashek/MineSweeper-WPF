@@ -8,11 +8,6 @@ namespace MineSweeperWPF
     {
         public Position Position { get; init; }
 
-        public void ChangeStyle(Style style)
-        {
-            Style = style;
-        }
-
         public static readonly DependencyProperty NumberProperty =
         DependencyProperty.Register("Number", typeof(string),
         typeof(Tile), new UIPropertyMetadata(""));
