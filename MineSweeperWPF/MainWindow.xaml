@@ -8,23 +8,31 @@
         Title="MainWindow" Height="450" Width="450" ResizeMode="NoResize"
         x:Name="window"
         Icon="Images/mine.png">
+
     <Window.Resources>
+
         <Style x:Key="defaultPanel" TargetType="Grid">
             <Setter Property="Background" Value="Azure"/>
         </Style>
+
         <Style x:Key="winPanel" TargetType="Grid">
             <Setter Property="Background" Value="#00E676"/>
         </Style>
+
         <Style x:Key="losePanel" TargetType="Grid">
             <Setter Property="Background" Value="IndianRed"/>
         </Style>
+
         <Style x:Key="text" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Roboto"/>
             <Setter Property="FontSize" Value="22"/>
-            <Setter Property="FontWeight" Value="DemiBold"/>
+            <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="5 0 0 0"/>
             <Setter Property="Text" Value="000"/>
         </Style>
+
         <Style x:Key="restartBtnStyle" TargetType="Button">
             <Setter Property="Template">
                 <Setter.Value>
@@ -48,8 +56,11 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
     </Window.Resources>
+
     <DockPanel>
+
         <Menu x:Name="menu" Height="25" VerticalAlignment="Center" DockPanel.Dock="Top" Background="White">
             <MenuItem Header="Game">
                 <MenuItem Header="New game" Click="Restart"></MenuItem>
@@ -62,8 +73,10 @@
                 <MenuItem Header="Exit" Click="Exit"></MenuItem>
             </MenuItem>
         </Menu>
+
         <Grid x:Name="gamePanel" DockPanel.Dock="Top" Height="40"
               Style="{StaticResource defaultPanel}">
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
@@ -73,24 +86,21 @@
                         Orientation="Horizontal"
                         HorizontalAlignment="Center">
                 <Image Source="Images/mine.png" Width="30"/>
-                <TextBlock x:Name="minesCount"
-                       Style="{StaticResource text}"/>
+                <TextBlock x:Name="minesCount" Style="{StaticResource text}"/>
             </StackPanel>
             
             <Button x:Name="restartBtn"                    
                     Click="Restart" 
                     Grid.Column="1"
-                    Style="{StaticResource restartBtnStyle}"
-                    >
+                    Style="{StaticResource restartBtnStyle}">
                 <Image Source="Images/reset.png"/>                
             </Button>
             
             <StackPanel Grid.Column="2" 
-                        Orientation="Horizontal" 
+                        Orientation="Horizontal"
                         HorizontalAlignment="Center">
                 <Image Source="Images/clock.png" Width="30" />
-                <TextBlock x:Name="timerText" 
-                       Style="{StaticResource text}"/>
+                <TextBlock x:Name="timerText" Style="{StaticResource text}"/>
             </StackPanel>
                     
         </Grid>
